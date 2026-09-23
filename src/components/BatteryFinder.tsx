@@ -148,7 +148,7 @@ export function BatteryFinder() {
             Find the Right Battery.
           </h2>
           <p className="mt-3 text-muted-foreground">
-            Tell us what you're powering and we will work out the capacity you need. Our team then confirms the exact
+            Tell us what you&apos;re powering and we will work out the capacity you need. Our team then confirms the exact
             product, price and availability before you buy.
           </p>
         </div>

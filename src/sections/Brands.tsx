@@ -25,7 +25,7 @@ export default function Brands() {
                     src={b.logo}
                     alt={b.name}
                     loading="lazy"
-                    className="h-8 w-auto max-w-[70%] object-contain object-left"
+                    className="brand-logo h-8 w-auto max-w-[70%] object-contain object-left"
                   />
                 ) : (
                   <span className="font-display text-base font-bold">{b.name}</span>

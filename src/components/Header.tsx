@@ -5,8 +5,8 @@ import { Menu, Phone, X } from 'lucide-react';
 import { business } from '../data/site';
 import { formatPhone, telLink } from '../lib/links';
 import { navLinks } from '../lib/navLinks';
-import { button } from './Button';
 import { LogoMark } from './Logo';
+import { ThemeToggle } from './ThemeToggle';
 
 export function Header() {
   const [open, setOpen] = useState(false);
@@ -36,29 +36,30 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-3 lg:flex">
-          <a href={telLink(business.primaryPhone)} className="flex items-center gap-2 text-sm font-semibold hover:text-primary">
-            <Phone className="h-4 w-4" aria-hidden="true" />
-            {formatPhone(business.primaryPhone)}
-          </a>
-          <a href="#batteries" className={button('primary', 'md')}>
-            Shop Batteries
-          </a>
-        </div>
+        <div className="flex items-center gap-3">
+          <div className="hidden items-center gap-3 lg:flex">
+            <a href={telLink(business.primaryPhone)} className="flex items-center gap-2 text-sm font-semibold hover:text-primary">
+              <Phone className="h-4 w-4" aria-hidden="true" />
+              {formatPhone(business.primaryPhone)}
+            </a>
+          </div>
 
-        <button
-          type="button"
-          onClick={() => setOpen((o) => !o)}
-          aria-expanded={open}
-          aria-label={open ? 'Close menu' : 'Open menu'}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-border lg:hidden"
-        >
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+          <button
+            type="button"
+            onClick={() => setOpen((o) => !o)}
+            aria-expanded={open}
+            aria-label={open ? 'Close menu' : 'Open menu'}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-border lg:hidden"
+          >
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+
+          <ThemeToggle />
+        </div>
       </div>
 
       {open && (
-        <nav aria-label="Mobile" className="border-t border-border bg-background lg:hidden">
+        <nav aria-label="Mobile" className="relative border-t border-border bg-background lg:hidden">
           <div className="container-apj flex flex-col py-3">
             {navLinks.map((l) => (
               <a

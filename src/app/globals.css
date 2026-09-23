@@ -26,6 +26,48 @@
   --whatsapp-foreground: oklch(99% 0.002 250);
 
   --radius: 0.625rem;
+
+  --shadow-card-value: 0 1px 2px oklch(21% 0.03 254 / 0.06), 0 8px 24px oklch(21% 0.03 254 / 0.06);
+  --shadow-lift-value: 0 2px 4px oklch(21% 0.03 254 / 0.08), 0 18px 40px oklch(21% 0.03 254 / 0.12);
+  --shadow-bar-value: 0 -2px 16px oklch(21% 0.03 254 / 0.12);
+
+  --logo-backdrop: transparent; /* brand logos get a light tile in dark mode */
+
+  color-scheme: light;
+}
+
+/*
+  DARK THEME — same token names, darker values. Switched by the sun/moon toggle in the
+  header, which sets data-theme="dark" on <html> (see src/lib/theme.ts).
+  The "navy" sections (hero, about, contact, footer) stay the deepest layer so the page
+  keeps its light/dark rhythm.
+*/
+:root[data-theme='dark'] {
+  --background: oklch(18.5% 0.024 256);
+  --foreground: oklch(94% 0.008 250);
+  --card: oklch(22% 0.026 256);
+  --muted: oklch(26% 0.024 256);
+  --muted-foreground: oklch(73% 0.02 255);
+  --border: oklch(32% 0.03 256);
+  --input: oklch(32% 0.03 256);
+  --ring: oklch(70% 0.16 256);
+  --secondary: oklch(27% 0.026 256);
+  --surface: oklch(20.5% 0.025 256);
+
+  /* lighter blue with dark text keeps contrast for both buttons and blue text */
+  --primary: oklch(70% 0.15 256);
+  --primary-foreground: oklch(16% 0.03 256);
+  --navy: oklch(13.5% 0.03 256);
+  --navy-foreground: oklch(97% 0.004 250);
+  --energy: oklch(72% 0.15 155);
+
+  --shadow-card-value: 0 1px 2px oklch(0% 0 0 / 0.4), 0 8px 24px oklch(0% 0 0 / 0.3);
+  --shadow-lift-value: 0 2px 4px oklch(0% 0 0 / 0.45), 0 18px 40px oklch(0% 0 0 / 0.45);
+  --shadow-bar-value: 0 -2px 16px oklch(0% 0 0 / 0.5);
+
+  --logo-backdrop: oklch(100% 0 0);
+
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -56,9 +98,9 @@
   --radius-xl: calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) + 8px);
 
-  --shadow-card: 0 1px 2px oklch(21% 0.03 254 / 0.06), 0 8px 24px oklch(21% 0.03 254 / 0.06);
-  --shadow-lift: 0 2px 4px oklch(21% 0.03 254 / 0.08), 0 18px 40px oklch(21% 0.03 254 / 0.12);
-  --shadow-bar: 0 -2px 16px oklch(21% 0.03 254 / 0.12);
+  --shadow-card: var(--shadow-card-value);
+  --shadow-lift: var(--shadow-lift-value);
+  --shadow-bar: var(--shadow-bar-value);
 }
 
 @layer base {
@@ -140,4 +182,32 @@
 /* Keep menu jumps from hiding under the sticky header */
 [id] {
   scroll-margin-top: 4.5rem;
+}
+
+/* Dark mode: transparent/opaque-white brand logos sit on a light tile so they stay readable */
+.brand-logo {
+  background: var(--logo-backdrop);
+  box-shadow: 0 0 0 0.375rem var(--logo-backdrop);
+  border-radius: 0.25rem;
+}
+
+/* Colours fade for a moment when the theme is switched (class added by ThemeToggle) */
+html.theme-transition,
+html.theme-transition *,
+html.theme-transition *::before,
+html.theme-transition *::after {
+  transition:
+    background-color 0.5s ease,
+    color 0.5s ease,
+    border-color 0.5s ease,
+    fill 0.5s ease,
+    stroke 0.5s ease,
+    box-shadow 0.5s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.theme-transition,
+  html.theme-transition * {
+    transition: none;
+  }
 }

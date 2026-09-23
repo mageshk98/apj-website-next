@@ -1,11 +1,13 @@
 import { business, founder, whyApj } from '../data/site';
 import { external } from '../components/Button';
 import { LinkedinIcon } from '../components/SocialIcons';
+import { EnergyField, founderSparks } from '../components/EnergyField';
 
 export default function About() {
   return (
-    <section id="about" className="section-y bg-navy text-navy-foreground">
-      <div className="container-apj">
+    <section id="about" className="relative overflow-hidden section-y bg-navy text-navy-foreground">
+      <EnergyField sparks={founderSparks} />
+      <div className="container-apj relative">
         <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
           <div>
             <p className="eyebrow text-spark">About APJ · Since {business.establishedYear}</p>
@@ -23,7 +25,7 @@ export default function About() {
               </a>
             </div>
             <p className="mt-5 border-l-2 border-spark pl-4 font-display text-lg font-semibold leading-snug">
-              "{founder.quote}"
+              &ldquo;{founder.quote}&rdquo;
             </p>
             <p className="mt-5 max-w-2xl leading-relaxed text-navy-foreground/75">{founder.bio}</p>
           </div>

@@ -3,7 +3,9 @@ import { Inter, Manrope } from 'next/font/google';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { MobileBottomBar, WhatsAppFloat } from '../components/FloatingBars';
+import { ScrollToTop } from '../components/ScrollToTop';
 import { business } from '../data/site';
+import { themeInitScript } from '../lib/theme';
 import './globals.css';
 
 // TODO: once the site has a real domain (custom domain or the vercel.app URL),
@@ -59,7 +61,7 @@ export const metadata: Metadata = {
     images: ['/hero-power.jpg'],
   },
   icons: {
-    icon: '/favicon.svg',
+    icon: '/logo-mark.webp',
   },
   robots: {
     index: true,
@@ -102,8 +104,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   };
 
   return (
-    <html lang="en" className={`${inter.variable} ${manrope.variable} h-full antialiased`}>
+    // suppressHydrationWarning: the inline script below sets data-theme on <html> before React hydrates.
+    <html lang="en" className={`${inter.variable} ${manrope.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       </head>
       <body className="flex min-h-full flex-col pb-14 lg:pb-0">
@@ -111,6 +115,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main className="flex-1">{children}</main>
         <Footer />
         <WhatsAppFloat />
+        <ScrollToTop />
         <MobileBottomBar />
       </body>
     </html>
