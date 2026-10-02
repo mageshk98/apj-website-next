@@ -1,24 +1,25 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, ExternalLink, Star } from 'lucide-react';
 import { animate, stagger, utils } from 'animejs';
 import { business } from '../data/site';
 import { prefersReducedMotion } from '../lib/motion';
-import { useGoogleReviews, type Review } from '../lib/useGoogleReviews';
+import type { Review } from '../lib/useGoogleReviews';
+import { staticReviews } from '../data/reviews';
 import { button, external } from '../components/Button';
 import { SectionTitle } from '../components/SectionTitle';
 
 /*
-  Customer reviews, pulled live from the business's Google Business Profile
-  through /api/google-reviews. Nothing here is hard-coded: if the API is
-  unavailable the section says so rather than inventing testimonials.
+  Customer reviews from the business's Google Business Profile. For now these
+  are a static copy (src/data/reviews.ts) of real reviews; the live
+  /api/google-reviews feed (useGoogleReviews) can replace them later.
 
-  Google attribution is kept on every card (author name, photo and a link to
-  the review on Google Maps), as the Places API terms require.
+  Each card keeps the author's name and marks it as a Google review.
 */
 
 const CARDS_PER_PAGE = { mobile: 1, tablet: 2, desktop: 3 };
+const AUTO_ADVANCE_MS = 7000;
 
 function useCardsPerPage() {
   const [perPage, setPerPage] = useState(CARDS_PER_PAGE.desktop);
@@ -124,28 +125,7 @@ function ReviewCard({ review }: { review: Review }) {
   );
 }
 
-function SkeletonCard() {
-  return (
-    <div className="card-surface flex h-full animate-pulse flex-col p-6" aria-hidden="true">
-      <div className="h-4 w-24 rounded bg-muted" />
-      <div className="mt-5 space-y-2">
-        <div className="h-3 w-full rounded bg-muted" />
-        <div className="h-3 w-11/12 rounded bg-muted" />
-        <div className="h-3 w-9/12 rounded bg-muted" />
-      </div>
-      <div className="mt-auto flex items-center gap-3 border-t border-border pt-4">
-        <div className="h-9 w-9 rounded-full bg-muted" />
-        <div className="space-y-2">
-          <div className="h-3 w-28 rounded bg-muted" />
-          <div className="h-2 w-20 rounded bg-muted" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function Testimonials() {
-  const { status, data } = useGoogleReviews();
   const perPage = useCardsPerPage();
   const [rawPage, setPage] = useState(0);
 
@@ -153,9 +133,9 @@ export default function Testimonials() {
   const introRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
 
-  const reviews = data?.reviews ?? [];
+  const reviews = staticReviews;
   const pageCount = Math.max(1, Math.ceil(reviews.length / perPage));
-  const mapsUrl = data?.googleMapsUri ?? business.mapsUrl;
+  const mapsUrl = business.mapsUrl;
 
   // Derived rather than stored, so a breakpoint change can never leave the
   // carousel parked on a page that no longer exists.
@@ -188,9 +168,18 @@ export default function Testimonials() {
 
     observer.observe(section);
     return () => observer.disconnect();
-  }, [status]);
+  }, []);
 
   const goTo = (next: number) => setPage(((next % pageCount) + pageCount) % pageCount);
+
+  // Auto-advance every 7s. Keyed on `page`, so any manual navigation restarts
+  // the countdown. Paused while the reader is hovering or focused on a card.
+  const [paused, setPaused] = useState(false);
+  useEffect(() => {
+    if (paused || pageCount <= 1 || prefersReducedMotion()) return;
+    const id = window.setTimeout(() => setPage((page + 1) % pageCount), AUTO_ADVANCE_MS);
+    return () => window.clearTimeout(id);
+  }, [page, paused, pageCount]);
 
   // Lightweight horizontal swipe for touch devices.
   const swipeStart = useRef<number | null>(null);
@@ -207,11 +196,6 @@ export default function Testimonials() {
     goTo(distance > 0 ? page + 1 : page - 1);
   };
 
-  const summary = useMemo(() => {
-    if (!data?.rating || !data.totalReviews) return null;
-    return { rating: data.rating, count: data.totalReviews };
-  }, [data]);
-
   return (
     <section id="reviews" ref={sectionRef} className="section-y bg-surface">
       <div className="container-apj">
@@ -221,121 +205,81 @@ export default function Testimonials() {
             title="What Our Customers Say"
             intro="Trusted by customers across Tamil Nadu for dependable power solutions, installation and service. Every review below comes from our Google Business Profile."
           />
-
-          {summary && (
-            <a
-              href={mapsUrl}
-              {...external}
-              className="card-surface flex items-center gap-4 p-4 transition-colors hover:border-primary/40"
-            >
-              <span className="font-display text-3xl font-extrabold leading-none">{summary.rating}</span>
-              <span>
-                <Stars rating={summary.rating} />
-                <span className="mt-1 block text-xs text-muted-foreground">
-                  Based on {summary.count} Google {summary.count === 1 ? 'review' : 'reviews'}
-                </span>
-              </span>
-            </a>
-          )}
         </header>
 
-        {status === 'loading' && (
-          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {[0, 1, 2].map((i) => (
-              <SkeletonCard key={i} />
+        {/* Carousel: one page at a time, 1/2/3 cards by breakpoint. */}
+        <div
+          className="mt-10 overflow-hidden"
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+          onPointerEnter={(e) => e.pointerType === 'mouse' && setPaused(true)}
+          onPointerLeave={(e) => e.pointerType === 'mouse' && setPaused(false)}
+          onFocus={() => setPaused(true)}
+          onBlur={(e) => !e.currentTarget.contains(e.relatedTarget) && setPaused(false)}
+        >
+          <div
+            ref={trackRef}
+            className="flex transition-transform duration-700 ease-in-out"
+            style={{ transform: `translateX(-${page * 100}%)` }}
+          >
+            {reviews.map((review) => (
+              <div
+                key={review.id}
+                className="shrink-0 grow-0 px-2 first:pl-0 last:pr-0"
+                style={{ flexBasis: `${100 / perPage}%` }}
+              >
+                <ReviewCard review={review} />
+              </div>
             ))}
           </div>
-        )}
+        </div>
 
-        {status === 'error' && (
-          <div className="card-surface mt-10 flex flex-col items-start gap-4 p-6 md:flex-row md:items-center md:justify-between">
-            <p className="text-sm text-muted-foreground">Customer reviews are temporarily unavailable.</p>
-            <a href={mapsUrl} {...external} className={button('outline', 'sm')}>
-              View our reviews on Google Maps
-              <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-            </a>
+        {pageCount > 1 && (
+          <div className="mt-6 flex items-center justify-center gap-4">
+            <button
+              type="button"
+              onClick={() => goTo(page - 1)}
+              aria-label="Previous reviews"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
+            >
+              <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+            </button>
+
+            <div className="flex items-center gap-2">
+              {Array.from({ length: pageCount }).map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => goTo(i)}
+                  aria-label={`Go to review page ${i + 1}`}
+                  aria-current={i === page}
+                  className={`h-1.5 rounded-full transition-all ${
+                    i === page ? 'w-6 bg-primary' : 'w-1.5 bg-muted-foreground/40 hover:bg-muted-foreground'
+                  }`}
+                />
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => goTo(page + 1)}
+              aria-label="Next reviews"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
+            >
+              <ChevronRight className="h-4 w-4" aria-hidden="true" />
+            </button>
           </div>
         )}
 
-        {status === 'ready' && reviews.length === 0 && (
-          <div className="card-surface mt-10 flex flex-col items-start gap-4 p-6 md:flex-row md:items-center md:justify-between">
-            <p className="text-sm text-muted-foreground">Customer reviews will appear here once available.</p>
-            <a href={mapsUrl} {...external} className={button('outline', 'sm')}>
-              View our reviews on Google Maps
-              <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-            </a>
-          </div>
-        )}
-
-        {status === 'ready' && reviews.length > 0 && (
-          <>
-            {/* Carousel: one page at a time, 1/2/3 cards by breakpoint. */}
-            <div className="mt-10 overflow-hidden" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
-              <div
-                ref={trackRef}
-                className="flex transition-transform duration-500 ease-out"
-                style={{ transform: `translateX(-${page * 100}%)` }}
-              >
-                {reviews.map((review) => (
-                  <div
-                    key={review.id}
-                    className="shrink-0 grow-0 px-2 first:pl-0 last:pr-0"
-                    style={{ flexBasis: `${100 / perPage}%` }}
-                  >
-                    <ReviewCard review={review} />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {pageCount > 1 && (
-              <div className="mt-6 flex items-center justify-center gap-4">
-                <button
-                  type="button"
-                  onClick={() => goTo(page - 1)}
-                  aria-label="Previous reviews"
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
-                >
-                  <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-                </button>
-
-                <div className="flex items-center gap-2">
-                  {Array.from({ length: pageCount }).map((_, i) => (
-                    <button
-                      key={i}
-                      type="button"
-                      onClick={() => goTo(i)}
-                      aria-label={`Go to review page ${i + 1}`}
-                      aria-current={i === page}
-                      className={`h-1.5 rounded-full transition-all ${
-                        i === page ? 'w-6 bg-primary' : 'w-1.5 bg-muted-foreground/40 hover:bg-muted-foreground'
-                      }`}
-                    />
-                  ))}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => goTo(page + 1)}
-                  aria-label="Next reviews"
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
-                >
-                  <ChevronRight className="h-4 w-4" aria-hidden="true" />
-                </button>
-              </div>
-            )}
-
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-              <a href={mapsUrl} {...external} className={button('outline')}>
-                View all reviews on Google Maps
-                <ExternalLink className="h-4 w-4" aria-hidden="true" />
-              </a>
-            </div>
-          </>
-        )}
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <a href={mapsUrl} {...external} className={button('outline')}>
+            View all reviews on Google Maps
+            <ExternalLink className="h-4 w-4" aria-hidden="true" />
+          </a>
+        </div>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          Reviews and ratings are provided by Google. Content belongs to its authors.
+          Reviews are from Google. Content belongs to its authors.
         </p>
       </div>
     </section>
