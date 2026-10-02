@@ -79,6 +79,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     url: SITE_URL,
     telephone: business.primaryPhone,
     email: business.email,
+    taxID: business.gstin,
     priceRange: '₹₹',
     address: {
       '@type': 'PostalAddress',

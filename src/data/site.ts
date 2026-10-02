@@ -20,6 +20,8 @@ export const business = {
   establishedYear: 2019,
   experienceYears: '7+',
   email: 'anbupowerjunction@gmail.com',
+  // GST registration number, shown in Contact and the footer.
+  gstin: '33BPVPJ9473B1ZJ',
   // Format: +91 followed by 10 digits, no spaces. The first one is the main number.
   phones: ['+919176969392', '+917200103710', '+918148113711'],
   primaryPhone: '+919176969392',

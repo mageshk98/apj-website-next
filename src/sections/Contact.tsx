@@ -26,6 +26,9 @@ export default function Contact() {
                 {line}
               </p>
             ))}
+            <p className="pt-2 text-sm text-navy-foreground/65">
+              GSTIN: <span className="font-mono tracking-wide text-navy-foreground/85">{business.gstin}</span>
+            </p>
           </address>
           <div className="mt-7 flex flex-wrap gap-3">
             <a href={business.mapsUrl} {...external} className={button('primary')}>

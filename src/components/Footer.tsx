@@ -24,7 +24,7 @@ export function Footer() {
       </div>
       <div className="container-apj flex flex-col gap-2 pb-8 text-xs text-navy-foreground/60 sm:flex-row sm:justify-between">
         <p>
-          © {new Date().getFullYear()} {business.legalName}. Proprietor: {business.proprietor}.
+          © {new Date().getFullYear()} {business.legalName}. Proprietor: {business.proprietor}. GSTIN: {business.gstin}
         </p>
         <p>Neelankarai, Chennai – 600 115 · Serving Tamil Nadu</p>
       </div>
