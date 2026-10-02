@@ -77,6 +77,11 @@ export const categories = [
     description:
       'Car batteries deliver the high burst of current needed to crank an engine, then recharge from the alternator. Choosing the right one depends on your car model, terminal layout, tray size and cranking requirement.',
     useCases: ['Petrol cars', 'Diesel cars', 'SUVs', 'Taxi and fleet use'],
+    // Optional card photo (put files in public/batteries/). Cards without one show an icon banner.
+    image: {
+      src: '/batteries/car.webp',
+      alt: 'Technician testing a car battery with a multimeter under the bonnet',
+    },
   },
   {
     slug: 'bike-batteries',
@@ -85,6 +90,11 @@ export const categories = [
     description:
       "Two-wheeler batteries are small, sealed and sensitive to correct sizing. The right unit depends on your model's voltage, capacity and terminal orientation.",
     useCases: ['Motorcycles', 'Scooters', 'Electric start models'],
+    // Photo: Kumpan Electric on Unsplash (Unsplash License)
+    image: {
+      src: '/batteries/bike.webp',
+      alt: 'Two-wheeler battery being fitted into a scooter',
+    },
   },
   {
     slug: 'inverter-batteries',
@@ -93,6 +103,11 @@ export const categories = [
     description:
       'Inverter batteries are designed for long, slow discharge cycles rather than engine cranking. Backup time depends on your load, battery capacity and inverter rating.',
     useCases: ['Homes', 'Shops', 'Clinics', 'Small offices'],
+    // Photo: Sergio Martins on Unsplash (Unsplash License)
+    image: {
+      src: '/batteries/inverter.webp',
+      alt: 'Wall-mounted home inverter and battery storage installation',
+    },
   },
   {
     slug: 'tubular-batteries',
@@ -101,6 +116,11 @@ export const categories = [
     description:
       'Tubular plate construction handles deeper discharge and longer service life than flat plate designs, which suits areas with frequent or extended power cuts.',
     useCases: ['Frequent power cuts', 'Long backup', 'Heavier loads'],
+    // Photo: Vanya Smythe on Unsplash (Unsplash License)
+    image: {
+      src: '/batteries/tubular.webp',
+      alt: 'Rows of heavy-duty battery cells with red and blue terminals',
+    },
   },
   {
     slug: 'solar-batteries',
@@ -109,6 +129,11 @@ export const categories = [
     description:
       'Solar batteries are built for daily cycling from panel charging. Correct sizing depends on panel wattage, daily consumption and the number of backup days you want.',
     useCases: ['Rooftop solar', 'Hybrid solar inverters', 'Off-grid setups'],
+    // Photo: Markus Spiske on Unsplash (Unsplash License)
+    image: {
+      src: '/batteries/solar.webp',
+      alt: 'Technician installing rooftop solar panels',
+    },
   },
   {
     slug: 'commercial-batteries',
@@ -117,6 +142,11 @@ export const categories = [
     description:
       'Commercial installations need load assessment before battery selection. We survey the site, calculate the load and recommend a bank that matches the duty cycle.',
     useCases: ['Offices', 'Showrooms', 'Workshops', 'Industrial units'],
+    // Photo: Toolmash Expo on Unsplash (Unsplash License)
+    image: {
+      src: '/batteries/commercial.webp',
+      alt: 'Electrician testing a commercial electrical panel with a multimeter',
+    },
   },
 ];
 
